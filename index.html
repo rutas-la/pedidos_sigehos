@@ -351,15 +351,16 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <p><b>Plazo de entrega (5 días hábiles).</b> Equivale a unos 7 días corridos, según lo que indicaste. <b>Frecuencia de pedido (22 días hábiles).</b> Equivale a un pedido al comienzo de cada mes. Ambos se cambian en Parámetros.</p>
     <p><b>Nivel de servicio.</b> Define cuánto stock de seguridad se suma:</p>
     <ul>
-      <li><b>95% solo en vitales</b> (por defecto): los vitales llevan colchón, el resto no. Es la opción más equilibrada cuando no hay que excederse del mes.</li>
-      <li><b>Sin stock de seguridad:</b> se pide lo justo para cubrir el mes. Es la más ajustada, pero un mes de consumo alto puede dejarte sin stock.</li>
+      <li><b>Sin stock de seguridad</b> (por defecto): se pide lo justo para cubrir el mes. Es la más ajustada, pero un mes de consumo alto puede dejarte sin stock.</li>
+      <li><b>10%, 15%, 20%, 50%, 80% del stock de seguridad:</b> se agrega solo esa fracción del colchón que daría un nivel de servicio de 95%, en todos los artículos. Sirven para tener algo de margen sin gastar de más.</li>
+      <li><b>95% solo en vitales:</b> los vitales llevan el colchón completo, el resto no.</li>
       <li><b>90%, 95%, 97,5%, 99%:</b> colchón para todos los artículos, cada vez más grande.</li>
     </ul>
-    <p>Los medicamentos de uso crónico que se tratan como vitales por la casilla correspondiente tienen prioridad en el presupuesto, pero no reciben colchón extra con la opción por defecto.</p>
+    <p>Los medicamentos de uso crónico que se tratan como vitales por la casilla correspondiente tienen prioridad en el presupuesto, pero no reciben colchón extra con la opción “95% solo en vitales”.</p>
     <p><b>Redondeo.</b> Los pedidos salen en múltiplos de 10 (configurable, 1 para no redondear). No se tiene en cuenta el tamaño de las cajas, salvo que marques “Pedir en cajas completas”. En ese caso la app toma el máximo común divisor de las presentaciones del artículo, que es lo que siempre se puede armar combinando presentaciones.</p>
 
     <h3 id="hp-4">4. Cómo se hace la estimación, paso a paso</h3>
-    <p>Este es el recorrido completo con un artículo real de un hospital: <b>acenocumarol 4 mg</b> (tres marcas sumadas), con datos de octubre de 2026. Con tus archivos los números cambian, pero el camino es el mismo. Parámetros usados: plazo de 5 días hábiles, frecuencia de 22 días hábiles, 95% de nivel de servicio solo en vitales (el acenocumarol es vital).</p>
+    <p>Este es el recorrido completo con un artículo real de un hospital: <b>acenocumarol 4 mg</b> (tres marcas sumadas), con datos de octubre de 2026. Con tus archivos los números cambian, pero el camino es el mismo. Parámetros usados: plazo de 5 días hábiles, frecuencia de 22 días hábiles, nivel de servicio “95% solo en vitales” (el acenocumarol es vital). Para ver los mismos números, elegí esa opción en Nivel de servicio: la app arranca con “Sin stock de seguridad”.</p>
 
     <p><b>Paso 1. Elegir los meses que mejor muestran la demanda.</b> Se compara cada mes de todos los artículos. Para que un artículo de miles de unidades no domine, cada artículo se mide contra su propio promedio (100 es un mes normal) y se promedia entre todos. Eso da un índice por mes. Se toman los 6 meses con índice más alto. La idea es que, cuando el presupuesto recortó las entregas, los meses de mayor entrega muestran mejor lo que los pacientes realmente necesitan.</p>
     <table class="ht">
@@ -382,7 +383,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <p><b>Paso 3. Mirar lo reciente.</b> El promedio de los últimos 3 meses (278, 295 y 342) es 305. Solo se reemplaza el consumo base cuando el reciente lo supera en 10% o más. Acá no, así que sigue 338.</p>
     <p><b>Paso 4. Pasar a días hábiles.</b> 338 ÷ 21,7 días hábiles = <b>15,6</b> comprimidos por día.</p>
     <p><b>Paso 5. Demanda hasta que llegue el próximo pedido.</b> Hay que cubrir los 5 días de espera más los 22 días hasta el siguiente pedido: 15,6 × 27 = <b>421</b>.</p>
-    <p><b>Paso 6. Colchón de seguridad.</b> Mide cuánto varía el consumo entre esos 6 meses (desvío de 97). Se multiplica por 1,645 (el factor del 95%) y por la raíz de (27 ÷ 21,7) = 1,12: 97 × 1,645 × 1,12 = <b>178</b>. Si el artículo no fuera vital, con la opción por defecto este paso daría 0.</p>
+    <p><b>Paso 6. Colchón de seguridad.</b> Mide cuánto varía el consumo entre esos 6 meses (desvío de 97). Se multiplica por 1,645 (el factor del 95%) y por la raíz de (27 ÷ 21,7) = 1,12: 97 × 1,645 × 1,12 = <b>178</b>. Si el artículo no fuera vital, con “95% solo en vitales” este paso daría 0.</p>
     <p><b>Paso 7. Stock objetivo.</b> 421 + 178 = <b>599</b>. Es lo que conviene tener al hacer el pedido.</p>
     <p><b>Paso 8. Restar lo que ya tenés.</b> Hay 335 en stock y nada en tránsito: 599 − 335 = 264. Se redondea hacia arriba al múltiplo de 10: se piden <b>270</b>.</p>
     <p><b>Paso 9. Revisar si es urgente.</b> El stock actual dura 21,5 días hábiles, más que los 5 del plazo de entrega y más que el punto de reposición (256). Por eso el estado es “Pedir” con urgencia baja (13 de 100) y no “Sin cobertura”.</p>
@@ -451,7 +452,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <tbody>
         <tr><td>Plazo de entrega</td><td>5 días hábiles</td><td>Desde que hacés el pedido hasta que llega, sin contar fines de semana.</td></tr>
         <tr><td>Frecuencia de pedido</td><td>22 días hábiles</td><td>Cada cuánto pedís. 22 días hábiles es aproximadamente un mes.</td></tr>
-        <tr><td>Nivel de servicio</td><td>95% solo en vitales</td><td>Cuánto colchón de seguridad se suma.</td></tr>
+        <tr><td>Nivel de servicio</td><td>Sin stock de seguridad</td><td>Cuánto colchón de seguridad se suma.</td></tr>
         <tr><td>Consumo mensual base</td><td>Meses de mayor entrega (6)</td><td>Cómo se estima el consumo. También hay promedio, promedio ponderado y mediana.</td></tr>
         <tr><td>Redondeo</td><td>Múltiplos de 10</td><td>El pedido sale en múltiplos de ese número.</td></tr>
         <tr><td>Consumo reciente</td><td>Activado</td><td>Usa el consumo de los últimos 3 meses si es mayor.</td></tr>
@@ -552,14 +553,19 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="field">
           <label for="pSl">Nivel de servicio</label>
           <select id="pSl">
-            <option value="0.5">Sin stock de seguridad (cubrir solo el mes)</option>
-            <option value="vital" selected>95% solo en vitales (sin los crónicos), sin colchón en el resto</option>
-            <option value="0.9">90%</option>
-            <option value="0.95">95%</option>
-            <option value="0.975">97,5%</option>
-            <option value="0.99">99%</option>
+            <option value="0.5" selected>Sin stock de seguridad (cubrir solo el mes)</option>
+            <option value="p10">10% del stock de seguridad</option>
+            <option value="p15">15% del stock de seguridad</option>
+            <option value="p20">20% del stock de seguridad</option>
+            <option value="p50">50% del stock de seguridad</option>
+            <option value="p80">80% del stock de seguridad</option>
+            <option value="vital">95% solo en vitales (sin los crónicos), sin colchón en el resto</option>
+            <option value="0.9">Nivel de servicio 90%</option>
+            <option value="0.95">Nivel de servicio 95%</option>
+            <option value="0.975">Nivel de servicio 97,5%</option>
+            <option value="0.99">Nivel de servicio 99%</option>
           </select>
-          <span class="hint">Define el stock de seguridad frente a meses de consumo irregular. Para comprar lo justo, elegí “Sin stock de seguridad” o “solo en vitales”.</span>
+          <span class="hint">Define el stock de seguridad frente a meses de consumo irregular. Para comprar lo justo, dejá “Sin stock de seguridad”. Los porcentajes de 10% a 80% agregan solo esa parte del colchón de 95%.</span>
         </div>
         <div class="field">
           <label for="pMethod">Consumo mensual base</label>
@@ -626,7 +632,7 @@ var $ = function(id){ return document.getElementById(id); };
 var MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 var nf0 = new Intl.NumberFormat('es-AR',{maximumFractionDigits:0});
 var nf1 = new Intl.NumberFormat('es-AR',{maximumFractionDigits:1});
-var Z = {'0.5':0,'vital':1.6449,'0.9':1.2816,'0.95':1.6449,'0.975':1.96,'0.99':2.3263};
+var Z = {'0.5':0,'p10':0.16449,'p15':0.246735,'p20':0.32898,'p50':0.82245,'p80':1.31592,'vital':1.6449,'0.9':1.2816,'0.95':1.6449,'0.975':1.96,'0.99':2.3263};
 var DM = 21.7; /* días hábiles por mes: atención de lunes a viernes */
 var ST = {
   crit:{label:'Sin cobertura',rank:0}, pedir:{label:'Pedir',rank:1}, ok:{label:'Suficiente',rank:2},
@@ -645,12 +651,12 @@ var FLABEL = {code:'Código',desc:'Descripción',tipo:'Tipo',stock:'Stock actual
 
 var state = {
   hist:null, stockf:null, pricef:null, map:{hist:{},stock:{},price:{}}, sample:false, error:'',
-  params:{lead:5,cycle:22,sl:'vital',method:'top',topK:6,dropLast:null,budget:null,depot:null,movInc:null,group:true,useMult:false,roundTo:10,useRecent:true,chronicVital:true,budgets:{},pricePer:'pack',useRef:false,useCompra:true,refDisc:0},
+  params:{lead:5,cycle:22,sl:'0.5',method:'top',topK:6,dropLast:null,budget:null,depot:null,movInc:null,group:true,useMult:false,roundTo:10,useRecent:true,chronicVital:true,budgets:{},pricePer:'pack',useRef:false,useCompra:true,refDisc:0},
   ui:{excl:new Set(),status:'all',tipo:null,cls:'all',q:'',sort:{key:'desc',dir:1},open:new Set()},
   ds:null, byKey:new Map()
 };
 try{
-  var saved = JSON.parse(localStorage.getItem('pedido-reposicion-params-v4')||'null');
+  var saved = JSON.parse(localStorage.getItem('pedido-reposicion-params-v5')||'null');
   if(saved){
     if(isFinite(saved.lead)) state.params.lead = Math.max(0,+saved.lead);
     if(isFinite(saved.cycle)) state.params.cycle = Math.max(1,+saved.cycle);
@@ -1259,7 +1265,7 @@ function detailHTML(it){
     ['Consumo mensual usado ('+methodLabel().toLowerCase()+')', fmtCons(r.base)],
     ['Promedio / mediana / desvío', fmtCons(r.mean)+' / '+fmtCons(r.median)+' / '+fmtCons(r.sd)],
     ['Consumo por día hábil', nf1.format(r.perDay)],
-    ['Stock de seguridad ('+(state.params.sl==='0.5'?'ninguno':state.params.sl==='vital'?'solo vitales, 95%':(+state.params.sl*100).toString().replace('.',',')+'%')+')', nf0.format(Math.ceil(r.ss))],
+    ['Stock de seguridad ('+(state.params.sl==='0.5'?'ninguno':/^p\d+$/.test(state.params.sl)?state.params.sl.slice(1)+'% del colchón de 95%, todos los artículos':state.params.sl==='vital'?'solo vitales, 95%':(+state.params.sl*100).toString().replace('.',',')+'%')+')', nf0.format(Math.ceil(r.ss))],
     ['Punto de reposición', nf0.format(Math.ceil(r.rop))],
     ['Stock objetivo (cubre '+(L+R)+' días hábiles)', nf0.format(Math.ceil(r.target))],
     ['Stock + en tránsito', nf0.format(r.disp)+(it.transito?' ('+nf0.format(it.transito)+' en tránsito)':'')],
@@ -1592,7 +1598,7 @@ $('btnHelp').addEventListener('click', function(){
 });
 document.querySelectorAll('.toc a').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); var t=document.getElementById(a.getAttribute('href').slice(1)); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }); });
 
-function saveParams(){ try{ localStorage.setItem('pedido-reposicion-params-v4', JSON.stringify({lead:state.params.lead,cycle:state.params.cycle,sl:state.params.sl,method:state.params.method,topK:state.params.topK})); }catch(e){} }
+function saveParams(){ try{ localStorage.setItem('pedido-reposicion-params-v5', JSON.stringify({lead:state.params.lead,cycle:state.params.cycle,sl:state.params.sl,method:state.params.method,topK:state.params.topK})); }catch(e){} }
 $('pLead').addEventListener('input', function(e){ var v=parseFloat(e.target.value); if(isFinite(v)&&v>=0){ state.params.lead=v; saveParams(); recalc(); } });
 $('pCycle').addEventListener('input', function(e){ var v=parseFloat(e.target.value); if(isFinite(v)&&v>=1){ state.params.cycle=v; saveParams(); recalc(); } });
 $('pSl').addEventListener('change', function(e){ state.params.sl=e.target.value; saveParams(); recalc(); });
