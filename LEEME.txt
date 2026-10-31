@@ -1,0 +1,5 @@
+Pedido de Reposición - archivos para GitHub Pages
+1. index.html  = la aplicación.
+2. precios.json = lista de precios por unidad (se lee sola). Para actualizar: reemplazar solo este archivo en el repositorio.
+   Formato: {"actualizado":"dd/mm/aaaa","compra":[["NOMBRE GENÉRICO EXACTO", precio], ...]}
+Los dos archivos deben estar en la misma carpeta del repositorio.
