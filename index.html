@@ -176,11 +176,12 @@ td.pedir.go{background:var(--accent-soft)}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;background:var(--cs);color:var(--c);white-space:nowrap}
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
 .spark{display:block;color:var(--accent);width:76px;height:auto}
-@container (max-width:1000px){.c-spark{display:none}}
-@container (max-width:820px){.c-gauge{display:none}}
+@container (max-width:1100px){.c-spark{display:none}}
+@container (max-width:960px){.c-gauge{display:none}}
 .c-imp{white-space:nowrap}
-@container (max-width:780px){.t thead th:nth-child(5),.t tr.row td:nth-child(5){display:none}}
-@container (max-width:690px){.t thead th:nth-child(3),.t tr.row td:nth-child(3){display:none}}
+@container (max-width:1000px){.t thead th:nth-child(6),.t tr.row td:nth-child(6){display:none}}
+@container (max-width:860px){.t thead th:nth-child(4),.t tr.row td:nth-child(4){display:none}}
+@container (max-width:700px){.t thead th:nth-child(3),.t tr.row td:nth-child(3){display:none}}
 tfoot .tot td{font-weight:700;background:var(--surface);border-top:2px solid var(--line);padding:8px 10px}
 .gauge{position:relative;height:10px;min-width:90px;background:var(--soft);border-radius:2px}
 .gauge .fill{position:absolute;left:0;top:0;bottom:0;background:var(--c);border-radius:2px}
@@ -238,6 +239,14 @@ table.t tbody tr.row:nth-child(even) td{background:#fff}
 table.t tbody tr.row:hover td{background:#e8f3f3}
 table.t td{border-bottom:1px solid #e3e6e9}
 .drop,.dz{border-radius:4px}
+.t th,.t td.n,.t td.c-st,.t td.c-gauge,.t td.c-spark,.t td.c-inc,.t td.c-imp{text-align:center!important}
+.t thead th .thbtn{display:inline-block}
+.t thead th:nth-child(2),.t td.art{text-align:left!important}
+.c-inc{width:44px;min-width:44px}
+.c-inc input{width:17px;height:17px;cursor:pointer;accent-color:var(--accent)}
+tr.row.excl td{opacity:.5;text-decoration:line-through}
+tr.row.excl td.c-inc{opacity:1;text-decoration:none}
+tr.row.excl td.n.pedir .trend{text-decoration:none}
 .corpfoot{margin-top:28px;padding:14px 0;border-top:1px solid var(--line);text-align:center;color:#343a40;font-size:13px}
 .corpfoot b{font-weight:600}
 </style>
@@ -636,7 +645,7 @@ var FLABEL = {code:'Código',desc:'Descripción',tipo:'Tipo',stock:'Stock actual
 var state = {
   hist:null, stockf:null, pricef:null, map:{hist:{},stock:{},price:{}}, sample:false, error:'',
   params:{lead:5,cycle:22,sl:'vital',method:'top',topK:6,dropLast:null,budget:null,depot:null,movInc:null,group:true,useMult:false,roundTo:10,useRecent:true,chronicVital:true,budgets:{},pricePer:'pack',useRef:false,useCompra:true,refDisc:0},
-  ui:{status:'all',tipo:null,cls:'all',q:'',sort:{key:'urg',dir:1},open:new Set()},
+  ui:{excl:new Set(),status:'all',tipo:null,cls:'all',q:'',sort:{key:'urg',dir:1},open:new Set()},
   ds:null, byKey:new Map()
 };
 try{
@@ -1165,11 +1174,12 @@ function applyBudget(ds){
   ds.hasCostV = vi.some(function(i){ return i.costo!=null; });
   ds.noPrice = vi.filter(function(i){ return i.r.pedir>0 && i.costo==null; }).length;
   ds.items.forEach(function(it){
-    var r=it.r; r.pedirAj=r.pedir; r.costAj=r.cost; r.recorte=false;
+    var r=it.r; r.pedirAj=r.pedir; r.costAj=r.cost; r.recorte=false; r.excl=state.ui.excl.has(it.key);
+    if(r.excl){ r.pedirAj=0; r.costAj=0; }
     if(inView(it) && it.costo!=null && r.disp>r.target) ds.excess += (r.disp-r.target)*it.costo;
   });
   if(!(b>0) || !ds.hasCostV) return;
-  var list = vi.filter(function(it){ return it.r.pedir>0 && it.costo!=null; });
+  var list = vi.filter(function(it){ return it.r.pedir>0 && it.costo!=null && !it.r.excl; });
   list.sort(function(x,y){
     var cx=isFinite(x.r.cob)?x.r.cob:1e12, cy=isFinite(y.r.cob)?y.r.cob:1e12;
     return ((y.r.urg==null?-1:y.r.urg)-(x.r.urg==null?-1:x.r.urg)) || (cx-cy);
@@ -1258,7 +1268,7 @@ function detailHTML(it){
   ];
   if(state.ds.budget && r.pedir>0) rows.push(['Ajustado al presupuesto', nf0.format(r.pedirAj)]);
   if(r.cost!=null) rows.push(['Costo estimado', money(r.costAj!=null?r.costAj:r.cost)]);
-  return '<tr class="det"><td colspan="9"><div class="detail"><div>'+
+  return '<tr class="det"><td colspan="10"><div class="detail"><div>'+
     '<div class="bars">'+bars+(r.base>0?'<div class="meanline" style="top:'+meanTop+'%"></div>':'')+'</div>'+
     '<div class="bl">'+lbl+'</div><div class="bv">'+val+'</div>'+
     '<p class="small" style="margin:8px 0 0">Línea punteada: consumo mensual usado.</p></div><div>'+
@@ -1274,19 +1284,19 @@ function detailHTML(it){
 function rowHTML(it){
   var r=it.r, open=state.ui.open.has(it.key), st=ST[r.status];
   var trend = r.trend!=null ? '<span class="trend">'+(r.trend>0?'↑ ':'↓ ')+nf0.format(Math.abs(r.trend)*100)+'% últ. 3 meses</span>' : '';
-  return '<tr class="row'+(open?' open':'')+'"><td class="art"><button type="button" class="rowbtn" data-act="toggle" data-k="'+esc(it.key)+'" title="'+esc(it.desc)+'" aria-expanded="'+open+'">'+
+  return '<tr class="row'+(open?' open':'')+(r.excl?' excl':'')+'"><td class="c-inc"><input type="checkbox" data-excl="'+esc(it.key)+'" '+(r.excl?'':'checked')+' title="'+(r.excl?'Excluido del pedido: tildá para incluirlo':'Incluido en el pedido: destildá para excluirlo')+'" aria-label="Incluir en el pedido: '+esc(it.desc||it.key)+'"></td><td class="art"><button type="button" class="rowbtn" data-act="toggle" data-k="'+esc(it.key)+'" title="'+esc(it.desc)+'" aria-expanded="'+open+'">'+
     '<span class="chev" aria-hidden="true"></span><span class="code">'+clsPill(it)+' '+esc((it.code||'sin código')+(it.codes.length>1?' +'+(it.codes.length-1):'')+' · '+it.tipo)+'</span><span class="dsc">'+esc(it.desc||it.key)+'</span></button></td>'+
     '<td class="n">'+(state.ds.stockMissing?'—':nf0.format(it.stock))+(it.transito?'<span class="trend">+'+nf0.format(it.transito)+' en tránsito</span>':'')+'</td>'+
     '<td class="n">'+fmtCons(r.base)+trend+'</td>'+
     '<td class="c-spark">'+sparkSVG(it.months.slice(-state.ds.nUse))+'</td>'+
     '<td class="n">'+fmtCob(r.cob)+'</td>'+
     '<td class="c-gauge">'+(state.ds.stockMissing?'<span class="small">Objetivo: '+nf0.format(Math.ceil(r.target))+'</span>':gaugeHTML(it))+'</td>'+
-    '<td class="n pedir'+(r.pedirAj>0?' go':'')+'">'+(r.pedirAj>0?nf0.format(r.pedirAj):'—')+(r.pedirAj>0&&it.mEff>state.params.roundTo?'<span class="trend">'+nf0.format(r.pedirAj/it.mEff)+' × '+nf0.format(it.mEff)+'</span>':'')+(r.recorte?'<span class="trend">de '+nf0.format(r.pedir)+' sugeridas</span>':'')+'</td>'+
-    '<td class="n c-imp">'+(it.costo!=null && r.pedirAj>0 ? money(r.pedirAj*it.costo)+'<span class="trend">'+money2(it.costo)+' c/u</span>' : '—')+'</td>'+
+    '<td class="n pedir'+(r.pedirAj>0?' go':'')+'">'+(r.excl?'<span class="trend">Excluido</span>':(r.pedirAj>0?nf0.format(r.pedirAj):'—'))+(r.pedirAj>0&&it.mEff>state.params.roundTo?'<span class="trend">'+nf0.format(r.pedirAj/it.mEff)+' × '+nf0.format(it.mEff)+'</span>':'')+(r.recorte?'<span class="trend">de '+nf0.format(r.pedir)+' sugeridas</span>':'')+'</td>'+
+    '<td class="n c-imp">'+(!r.excl && it.costo!=null && r.pedirAj>0 ? money(r.pedirAj*it.costo)+'<span class="trend">'+money2(it.costo)+' c/u</span>' : '—')+'</td>'+
     '<td class="c-st"><span class="pill st-'+r.status+'">'+st.label+'</span><br>'+urgHTML(it)+'</td></tr>'+(open?detailHTML(it):'');
 }
 var COLS = [
-  {k:'desc',l:'Artículo',d:1},{k:'stock',l:'Stock',n:1,d:-1},{k:'mean',l:'Consumo / mes',n:1,d:-1},
+  {k:null,l:'Incluir',c:'c-inc'},{k:'desc',l:'Artículo',d:1},{k:'stock',l:'Stock',n:1,d:-1},{k:'mean',l:'Consumo / mes',n:1,d:-1},
   {k:null,l:'Meses',c:'c-spark'},{k:'cob',l:'Cobertura (días háb.)',n:1,d:1},{k:null,l:'Stock vs. objetivo',c:'c-gauge'},{k:'pedir',l:'A pedir',n:1,d:-1},{k:'imp',l:'Importe',n:1,d:-1,c:'c-imp'},{k:'urg',l:'Urgencia y estado',d:1,c:'c-st'}
 ];
 function sortVal(it,k){
@@ -1347,7 +1357,7 @@ function renderSummary(){
   if(!ds||ds.error){ box.hidden=true; return; }
   box.hidden=false;
   var cnt={crit:0,pedir:0,ok:0,sobre:0,sinmov:0,sinstock:0,inact:0}, cost=0, vit=viewItems();
-  vit.forEach(function(it){ cnt[it.r.status]++; if(it.r.cost!=null) cost+=it.r.cost; });
+  var nExcl=0; vit.forEach(function(it){ cnt[it.r.status]++; if(it.r.excl){ nExcl++; return; } if(it.r.cost!=null) cost+=it.r.cost; });
   var extra=[];
   if(ds.budget){
     var bd=ds.budget;
@@ -1355,9 +1365,10 @@ function renderSummary(){
       ? 'El presupuesto de '+money(bd.total)+' alcanza para todo el pedido.'
       : 'Con el presupuesto de '+money(bd.total)+' se piden '+bd.nFull+' artículos completos'+(bd.nPartial?', '+bd.nPartial+' parciales':'')+(bd.nNone?' y '+bd.nNone+' quedan sin pedir':'')+'. Faltan '+money(bd.falta)+' para el pedido completo. Se compra primero lo más urgente, y la urgencia pesa más en los vitales. Se cubre el consumo esperado de cada artículo antes que su stock de seguridad.');
   }
+  if(nExcl) extra.push(nExcl+' artículo'+(nExcl>1?'s':'')+' excluido'+(nExcl>1?'s':'')+' del pedido: no suman al costo total ni al presupuesto.');
   if(ds.excess>0) extra.push('Hay '+money(ds.excess)+' de stock por encima del objetivo. No repongas esos artículos hasta que bajen.');
   var topHTML='';
-  var tops = ds.stockMissing ? [] : vit.filter(function(it){ return it.r.urg!=null && it.r.urg>=20 && it.r.pedir>0; })
+  var tops = ds.stockMissing ? [] : vit.filter(function(it){ return it.r.urg!=null && it.r.urg>=20 && it.r.pedir>0 && !it.r.excl; })
     .sort(function(a,b){ return (b.r.urg-a.r.urg) || (a.r.cob-b.r.cob); }).slice(0,5);
   if(tops.length) topHTML = '<div class="top5"><div class="small"><b>Más urgentes ahora</b></div><ol>'+tops.map(function(it){
     var r=it.r;
@@ -1369,7 +1380,7 @@ function renderSummary(){
     Object.keys(ST).filter(function(k){return cnt[k]>0;}).map(function(k){
       return '<button type="button" class="chip st-'+k+'" data-status="'+k+'" aria-pressed="'+(u===k)+'"><span class="dot"></span>'+ST[k].label+' <b>'+cnt[k]+'</b></button>';
     }).join('');
-  var toOrder = cnt.crit+cnt.pedir;
+  var toOrder = vit.filter(function(it){ return !it.r.excl && it.r.pedir>0 && (it.r.status==='crit'||it.r.status==='pedir'); }).length;
   box.innerHTML = '<div class="seg" aria-hidden="true">'+seg+'</div><div class="chips">'+chips+
     '<span class="cost">'+(ds.stockMissing?'Falta el stock actual para calcular el pedido':'<b>'+toOrder+'</b> artículos para pedir')+(ds.hasCostV?' · pedido completo <b>'+money(cost)+'</b>'+(ds.budget?' · con presupuesto <b>'+money(ds.budget.used)+'</b>':''):'')+'</span></div>'+
     extra.map(function(t){ return '<p class="small" style="margin:0">'+esc(t)+'</p>'; }).join('')+topHTML;
@@ -1384,7 +1395,7 @@ function renderTable(){
     var on = s.key===c.k;
     return '<th class="'+(c.n?'n':'')+(c.c?' '+c.c:'')+'" aria-sort="'+(on?(s.dir===1?'ascending':'descending'):'none')+'"><button type="button" class="thbtn" data-sort="'+c.k+'" data-on="'+(on?1:0)+'">'+c.l+(on?(s.dir===1?' ↑':' ↓'):'')+'</button></th>';
   }).join('');
-  var body = list.length ? list.map(rowHTML).join('') : '<tr><td colspan="9" class="empty">Ningún artículo coincide con el filtro.</td></tr>';
+  var body = list.length ? list.map(rowHTML).join('') : '<tr><td colspan="10" class="empty">Ningún artículo coincide con el filtro.</td></tr>';
   var totImp=0, nImp=0; list.forEach(function(it){ if(it.costo!=null && it.r.pedirAj>0){ totImp+=it.r.pedirAj*it.costo; nImp++; } });
   var foot = (list.length && nImp) ? '<tfoot><tr class="tot"><td colspan="'+(COLS.length-2)+'">Total de los '+nImp+' artículos con precio'+(list.length>nImp?' (hay '+(list.filter(function(it){return it.r.pedirAj>0;}).length-nImp)+' a pedir sin precio)':'')+'</td><td class="n c-imp">'+money(totImp)+'</td><td></td></tr></tfoot>' : '';
   box.innerHTML = '<table class="t"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody>'+foot+'</table>';
@@ -1633,6 +1644,11 @@ $('summary').addEventListener('click', function(e){
   var b=e.target.closest('[data-status]'); if(!b) return;
   state.ui.status = (state.ui.status===b.dataset.status) ? 'all' : b.dataset.status;
   renderSummary(); renderTable();
+});
+$('tablebox').addEventListener('change', function(e){
+  var c=e.target.closest('[data-excl]'); if(!c) return;
+  if(c.checked) state.ui.excl.delete(c.dataset.excl); else state.ui.excl.add(c.dataset.excl);
+  refresh(true);
 });
 $('tablebox').addEventListener('click', function(e){
   var t=e.target.closest('[data-act="toggle"]');
