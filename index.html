@@ -288,7 +288,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <h2 id="h-help">Cómo funciona esta app</h2>
     <p class="hl">Esta guía explica qué hace la app, cómo cargar la información, cómo se calcula cada número y por qué se eligió así. Al final hay una lista de cuidados para usar el resultado.</p>
     <nav class="toc" aria-label="Contenido de la guía">
-      <a href="#hp-1">1. Para qué sirve</a><a href="#hp-2">2. Cómo cargar la información</a><a href="#hp-3">3. Cómo se calcula el pedido</a><a href="#hp-4">4. La estimación paso a paso</a><a href="#hp-5">5. Clase y urgencia</a><a href="#hp-6">6. Estados</a><a href="#hp-7">7. Presupuesto y precios</a><a href="#hp-8">8. Medicamentos y descartables</a><a href="#hp-9">9. Cómo leer la tabla</a><a href="#hp-10">10. Parámetros</a><a href="#hp-11">11. Cuidados y límites</a>
+      <a href="#hp-1">1. Para qué sirve</a><a href="#hp-2">2. Cómo cargar la información</a><a href="#hp-3">3. Cómo se calcula el pedido</a><a href="#hp-4">4. La estimación paso a paso</a><a href="#hp-5">5. Clase y urgencia</a><a href="#hp-6">6. Estados</a><a href="#hp-7">7. Presupuesto y precios</a><a href="#hp-8">8. Medicamentos y descartables</a><a href="#hp-9">9. Cómo leer la tabla</a><a href="#hp-10">10. Parámetros</a><a href="#hp-11">11. Cuidados y límites</a><a href="#hp-12">12. Compra anticipada</a>
     </nav>
 
     <h3 id="hp-1">1. Para qué sirve</h3>
@@ -454,6 +454,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <tr><td>Frecuencia de pedido</td><td>22 días hábiles</td><td>Cada cuánto pedís. 22 días hábiles es aproximadamente un mes.</td></tr>
         <tr><td>Nivel de servicio</td><td>Sin stock de seguridad</td><td>Cuánto colchón de seguridad se suma.</td></tr>
         <tr><td>Consumo mensual base</td><td>Meses de mayor entrega (6)</td><td>Cómo se estima el consumo. También hay promedio, promedio ponderado y mediana.</td></tr>
+        <tr><td>Horizonte de compra</td><td>Manual</td><td>Si elegís “Hasta fin de un mes”, la app cuenta los días hábiles hasta esa fecha, descontando feriados.</td></tr>
+        <tr><td>Consumo mensual base</td><td>Mismo período del año anterior</td><td>Opción para compras anticipadas: usa lo entregado en los mismos meses del año pasado.</td></tr>
         <tr><td>Redondeo</td><td>Múltiplos de 10</td><td>El pedido sale en múltiplos de ese número.</td></tr>
         <tr><td>Consumo reciente</td><td>Activado</td><td>Usa el consumo de los últimos 3 meses si es mayor.</td></tr>
         <tr><td>Crónicos como vitales</td><td>Activado</td><td>Les da prioridad en el presupuesto.</td></tr>
@@ -473,6 +475,16 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <li><b>No guarda tus archivos.</b> Cargalos de nuevo en cada sesión. Lo único que se recuerda en tu navegador son los parámetros principales y las clases que corrijas.</li>
       <li><b>Un artículo discontinuado</b> puede aparecer sin stock con consumo viejo. Si no tuvo consumo en los últimos 3 meses, no se pide.</li>
     </ul>
+    <h3 id="hp-12">12. Compra anticipada (varios meses)</h3>
+    <p>Sirve cuando hacés una compra única que tiene que alcanzar para varios meses, por ejemplo diciembre y enero con el presupuesto que se libera a mediados de noviembre.</p>
+    <ol>
+      <li>En <b>Horizonte de compra</b> elegí “Hasta fin de enero” (o el mes que corresponda).</li>
+      <li>Poné la <b>fecha en que vas a hacer el pedido</b>. La app cuenta el plazo de entrega desde ahí y la fecha de llegada.</li>
+      <li>Revisá la lista de <b>feriados</b>. Cada feriado entre semana se descuenta de los días hábiles. Podés agregar o sacar fechas.</li>
+      <li>Si querés, cambiá el <b>consumo mensual base</b> a “Mismo período del año anterior”. Toma lo que se entregó en esos mismos meses el año pasado, ponderado por los días hábiles de cada mes. Necesita al menos 12 meses de historia.</li>
+      <li>Cargá el <b>presupuesto</b>. Si no alcanza para todo, la app cubre primero el primer mes de todos los artículos, por urgencia. Con lo que queda, completa el resto del horizonte y al final el stock de seguridad.</li>
+    </ol>
+    <p>En el detalle de cada artículo, la fila “Cobertura con el pedido” indica cuántos días hábiles dura el stock más lo que se pide. Con el horizonte activado, la frecuencia de pedido se calcula sola.</p>
   </section>
 
   <div class="layout" id="layout">
@@ -546,9 +558,24 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span class="hint">Desde que hacés el pedido hasta que llega, contando solo de lunes a viernes.</span>
         </div>
         <div class="field">
+          <label for="pHor">Horizonte de compra</label>
+          <select id="pHor"></select>
+          <span class="hint" id="planHint"></span>
+        </div>
+        <div class="field" id="ordField" hidden>
+          <label for="pOrdDate">Fecha en que hacés el pedido</label>
+          <input type="date" id="pOrdDate">
+          <span class="hint">Si lo dejás vacío se usa la fecha de hoy. Desde esa fecha se cuenta el plazo de entrega.</span>
+        </div>
+        <div class="field" id="holField" hidden>
+          <label for="pHol">Feriados y días sin entrega</label>
+          <textarea id="pHol" rows="5" style="width:100%;font:inherit;padding:6px 8px;border:1px solid var(--line,#c9d1d9);border-radius:6px;box-sizing:border-box"></textarea>
+          <span class="hint">Una fecha por línea (dd/mm/aaaa). Se descuentan de los días hábiles. Ya vienen cargados los de fin de 2026 y principios de 2027.</span>
+        </div>
+        <div class="field">
           <label for="pCycle">Frecuencia de pedido</label>
           <div class="unit"><input type="number" id="pCycle" min="1" max="365" step="1" value="22" inputmode="numeric"><span>días hábiles</span></div>
-          <span class="hint">Cada cuánto reponés. 22 días hábiles es aproximadamente un mes.</span>
+          <span class="hint">Cada cuánto reponés. 22 días hábiles es aproximadamente un mes. Si elegís un horizonte de compra, se calcula solo.</span>
         </div>
         <div class="field">
           <label for="pSl">Nivel de servicio</label>
@@ -571,6 +598,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <label for="pMethod">Consumo mensual base</label>
           <select id="pMethod">
             <option value="top" selected>Meses de mayor entrega</option>
+            <option value="season">Mismo período del año anterior</option>
             <option value="mean">Promedio de los meses</option>
             <option value="wmean">Promedio ponderado (pesa más lo reciente)</option>
             <option value="median">Mediana (ignora picos)</option>
@@ -587,6 +615,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span class="hint">Opcional. Hace falta el costo unitario en el archivo. Se compra primero lo más urgente, y la urgencia pesa más en los vitales.</span>
         </div>
         <label class="check" id="lblCompra" hidden style="margin-bottom:10px"><input type="checkbox" id="pCompra" checked><span>Usar la lista de precios incluida <span class="small" id="compraInfo"></span></span></label>
+        <label class="check" id="firstField"><input type="checkbox" id="pFirst" checked><span>Con presupuesto limitado y varios meses de compra, cubrir primero el primer mes de todos los artículos.</span></label>
         <label class="check"><input type="checkbox" id="pGroup" checked><span>Sumar las marcas del mismo genérico. Evita falsos faltantes cuando cambia la marca.</span></label>
         <label class="check" style="margin-top:8px"><input type="checkbox" id="pMult"><span>Pedir en cajas completas, según la equivalencia del archivo de stock</span></label>
         <div class="field" style="margin-top:8px">
@@ -630,6 +659,44 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 'use strict';
 var $ = function(id){ return document.getElementById(id); };
 var MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+var MESNOM = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+var DEF_FERIADOS = '23/11/2026\n07/12/2026\n08/12/2026\n25/12/2026\n01/01/2027\n08/02/2027\n09/02/2027';
+function pad2(n){ return (n<10?'0':'')+n; }
+function ymd(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function fmtD(d){ return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear(); }
+function parseFeriados(txt){
+  var set={}, re=/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})|(\d{4})-(\d{2})-(\d{2})/g, m;
+  txt=String(txt||'');
+  while((m=re.exec(txt))){
+    var y,mo,da;
+    if(m[4]){ y=+m[4]; mo=+m[5]; da=+m[6]; } else { da=+m[1]; mo=+m[2]; y=+m[3]; if(y<100) y+=2000; }
+    if(mo>=1&&mo<=12&&da>=1&&da<=31) set[y+'-'+pad2(mo)+'-'+pad2(da)]=1;
+  }
+  return set;
+}
+function isBiz(d,hol){ var w=d.getDay(); return w>=1 && w<=5 && !(hol && hol[ymd(d)]); }
+function addBiz(d,n,hol){ var c=new Date(d.getTime()); while(n>0){ c.setDate(c.getDate()+1); if(isBiz(c,hol)) n--; } return c; }
+function bizBetween(a,b,hol){ var c=new Date(a.getTime()), n=0; c.setDate(c.getDate()+1); while(c<=b){ if(isBiz(c,hol)) n++; c.setDate(c.getDate()+1); } return n; }
+function parseDateInput(v){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v||''); return m ? new Date(+m[1],+m[2]-1,+m[3],12) : null; }
+function planWindow(){
+  var p=state.params, L=p.lead, hol=parseFeriados(p.holidays);
+  var t=new Date(); var od=parseDateInput(p.orderDate)||new Date(t.getFullYear(),t.getMonth(),t.getDate(),12);
+  var arrive=addBiz(od,Math.round(L),hol), end, R, hm=/^(\d{4})-(\d{2})$/.exec(p.horizon||'');
+  if(hm){ end=new Date(+hm[1],+hm[2],0,12); R=Math.max(1,bizBetween(od,end,hol)-Math.round(L)); }
+  else { R=p.cycle; end=addBiz(od,Math.round(L+R),hol); }
+  var nHol=0, c=new Date(od.getTime()); c.setDate(c.getDate()+1);
+  while(c<=end){ var w=c.getDay(); if(w>=1&&w<=5&&hol[ymd(c)]) nHol++; c.setDate(c.getDate()+1); }
+  return {R:R, end:end, arrive:arrive, od:od, hol:hol, nHol:nHol, auto:!!hm};
+}
+function getR(){ return planWindow().R; }
+function labMonth(l){
+  var s=String(l).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''), m;
+  for(var i=0;i<12;i++) if(s.indexOf(MESES[i])>=0) return i+1;
+  if((m=/^(\d{4})[-\/](\d{1,2})/.exec(s))) return +m[2];
+  if((m=/^(\d{1,2})[-\/.](\d{2,4})/.exec(s))) return +m[1];
+  return 0;
+}
 var nf0 = new Intl.NumberFormat('es-AR',{maximumFractionDigits:0});
 var nf1 = new Intl.NumberFormat('es-AR',{maximumFractionDigits:1});
 var Z = {'0.5':0,'p10':0.16449,'p15':0.246735,'p20':0.32898,'p50':0.82245,'p80':1.31592,'vital':1.6449,'0.9':1.2816,'0.95':1.6449,'0.975':1.96,'0.99':2.3263};
@@ -651,7 +718,7 @@ var FLABEL = {code:'Código',desc:'Descripción',tipo:'Tipo',stock:'Stock actual
 
 var state = {
   hist:null, stockf:null, pricef:null, map:{hist:{},stock:{},price:{}}, sample:false, error:'',
-  params:{lead:5,cycle:22,sl:'0.5',method:'top',topK:6,dropLast:null,budget:null,depot:null,movInc:null,group:true,useMult:false,roundTo:10,useRecent:true,chronicVital:true,budgets:{},pricePer:'pack',useRef:false,useCompra:true,refDisc:0},
+  params:{lead:5,cycle:22,horizon:'manual',orderDate:'',holidays:DEF_FERIADOS,firstMonth:true,sl:'0.5',method:'top',topK:6,dropLast:null,budget:null,depot:null,movInc:null,group:true,useMult:false,roundTo:10,useRecent:true,chronicVital:true,budgets:{},pricePer:'pack',useRef:false,useCompra:true,refDisc:0},
   ui:{excl:new Set(),status:'all',tipo:null,cls:'all',q:'',sort:{key:'desc',dir:1},open:new Set()},
   ds:null, byKey:new Map()
 };
@@ -661,7 +728,10 @@ try{
     if(isFinite(saved.lead)) state.params.lead = Math.max(0,+saved.lead);
     if(isFinite(saved.cycle)) state.params.cycle = Math.max(1,+saved.cycle);
     if(Z[saved.sl]) state.params.sl = saved.sl;
-    if(['top','mean','wmean','median'].indexOf(saved.method)>=0) state.params.method = saved.method;
+    if(['top','mean','wmean','median','season'].indexOf(saved.method)>=0) state.params.method = saved.method;
+    if(typeof saved.holidays==='string' && saved.holidays.trim()) state.params.holidays = saved.holidays;
+    if(typeof saved.horizon==='string') state.params.horizon = saved.horizon;
+    if(saved.firstMonth===false) state.params.firstMonth = false;
     if(isFinite(saved.topK) && saved.topK>=1) state.params.topK = Math.round(+saved.topK);
   }
 }catch(e){}
@@ -1056,7 +1126,8 @@ function buildDataset(){
 
 /* ---------- Cálculo de reposición ---------- */
 function compute(ds){
-  var p=state.params, L=p.lead, R=p.cycle, z=Z[p.sl], nUse=ds.nUse;
+  var p=state.params, L=p.lead, W=planWindow(), R=W.R, z=Z[p.sl], nUse=ds.nUse;
+  ds.plan=W; ds.seasonInfo='';
   /* Índice de entrega por mes: cada artículo contra su propio promedio, así ningún artículo domina por tener unidades más grandes. 100 = mes promedio. */
   var idxv=new Array(nUse).fill(0), cntI=0;
   ds.items.forEach(function(it){
@@ -1069,6 +1140,18 @@ function compute(ds){
     var kk=Math.max(1,Math.min(Math.round(p.topK)||1,nUse));
     topSel = ds.monthIdx.map(function(x,i){return [x,i];}).sort(function(a,b){return b[0]-a[0];}).slice(0,kk).map(function(a){return a[1];}).sort(function(a,b){return a-b;});
   }
+  var seasonW=null;
+  if(p.method==='season'){
+    var wm={}, cur=new Date(W.arrive.getTime());
+    cur.setDate(cur.getDate()+1);
+    while(cur<=W.end){ if(isBiz(cur,W.hol)){ var mk=cur.getMonth()+1; wm[mk]=(wm[mk]||0)+1; } cur.setDate(cur.getDate()+1); }
+    var lab=ds.labels.slice(-nUse), seen={}, sw=new Array(nUse).fill(0), tot=0;
+    for(var li=nUse-1;li>=0;li--){ var mn=labMonth(lab[li]); if(mn&&wm[mn]&&!seen[mn]){ seen[mn]=1; sw[li]=wm[mn]; tot+=wm[mn]; } }
+    if(tot>0){
+      seasonW=sw; topSel=[]; sw.forEach(function(w,i){ if(w>0) topSel.push(i); });
+      ds.seasonInfo='Consumo base: mismo período del año anterior ('+topSel.map(function(i){ return lab[i]+', '+sw[i]+' días hábiles'; }).join('; ')+'). '+(Object.keys(wm).filter(function(k){return !seen[k];}).length ? 'Falta el historial de: '+Object.keys(wm).filter(function(k){return !seen[k];}).map(function(k){return MESES[k-1];}).join(', ')+'; esos meses no entran en el cálculo. ' : '')+'Con este método no se aplica la regla del consumo reciente.';
+    } else ds.seasonInfo='El historial no incluye los meses del año anterior que cubre este pedido. Se usó el promedio de los meses.';
+  }
   ds.topSel = topSel;
   ds.items.forEach(function(it){
     var vals = it.months.slice(-nUse), n=vals.length;
@@ -1080,14 +1163,20 @@ function compute(ds){
     var wmean = ws/wt;
     var base = p.method==='median' ? median : p.method==='wmean' ? wmean : mean;
     var sdUse = sd;
-    if(topSel){
+    if(seasonW){
+      var sv2=[]; var sws=0, swt=0;
+      vals.forEach(function(v,i){ sws+=v*seasonW[i]; swt+=seasonW[i]; if(seasonW[i]>0) sv2.push(v); });
+      base = sws/swt;
+      var sm2 = sv2.reduce(function(a,b){return a+b;},0)/sv2.length;
+      sdUse = sv2.length>1 ? Math.sqrt(sv2.reduce(function(a,v){return a+(v-sm2)*(v-sm2);},0)/(sv2.length-1)) : 0;
+    } else if(topSel){
       var sv = topSel.map(function(i){ return vals[i]; }), sm = sv.reduce(function(a,b){return a+b;},0)/sv.length;
       base = sm;
       sdUse = sv.length>1 ? Math.sqrt(sv.reduce(function(a,v){return a+(v-sm)*(v-sm);},0)/(sv.length-1)) : 0;
     }
     var recent = n>=4 ? vals.slice(-3).reduce(function(a,b){return a+b;},0)/3 : 0;
     var recentUsed = false;
-    if(p.useRecent && n>=4 && base>0 && recent>=base*1.1){ base=recent; recentUsed=true; }
+    if(p.useRecent && !seasonW && n>=4 && base>0 && recent>=base*1.1){ base=recent; recentUsed=true; }
     var perDay = base/DM;
     var zc = classify(it);
     var zi = (p.sl==='vital') ? ((zc.cls==='V' && !zc.chr) ? Z.vital : 0) : z;
@@ -1192,18 +1281,21 @@ function applyBudget(ds){
     return ((y.r.urg==null?-1:y.r.urg)-(x.r.urg==null?-1:x.r.urg)) || (cx-cy);
   });
   /* Dos pasadas en orden de urgencia: primero el consumo esperado del ciclo (sin stock de seguridad) de cada artículo; con lo que sobra, se completa el stock de seguridad. */
-  var rem=b, need=0, L=state.params.lead, R=state.params.cycle;
+  var rem=b, need=0, L=state.params.lead, R=getR();
+  var blocks=Math.max(1,Math.round(R/DM)), firstOn=state.params.firstMonth!==false && blocks>=2, R1=R/blocks;
   var info = list.map(function(it){
     var r=it.r, unit=it.costo*it.mEff, want=r.pedir/it.mEff;
     var minU = Math.min(want, Math.ceil(Math.max(0, r.perDay*(L+R)-r.disp)/it.mEff));
+    var minU1 = Math.min(minU, Math.ceil(Math.max(0, r.perDay*(L+R1)-r.disp)/it.mEff));
     need += r.cost;
-    return {it:it, unit:unit, want:want, minU:minU, got:0};
+    return {it:it, unit:unit, want:want, minU:minU, minU1:minU1, got:0};
   });
   function buy(o, upto){
     var more = upto-o.got; if(more<=0) return;
     var can = o.unit>0 ? Math.min(more, Math.floor(rem/o.unit)) : more;
     if(can>0){ o.got+=can; rem-=can*o.unit; }
   }
+  if(firstOn) info.forEach(function(o){ buy(o,o.minU1); });
   info.forEach(function(o){ buy(o,o.minU); });
   info.forEach(function(o){ buy(o,o.want); });
   var nFull=0, nPartial=0, nNone=0, vShort=[];
@@ -1211,13 +1303,13 @@ function applyBudget(ds){
     var r=o.it.r;
     r.pedirAj = o.got*o.it.mEff; r.costAj = r.pedirAj*o.it.costo; r.recorte = o.got<o.want;
     if(!r.recorte) nFull++; else if(r.pedirAj>0) nPartial++; else nNone++;
-    if(o.it.cls==='V' && o.got<o.minU) vShort.push(o.it);
+    if(o.it.cls==='V' && o.got<(firstOn?o.minU1:o.minU)) vShort.push(o.it);
   });
-  ds.budget = {total:b, used:b-rem, falta:Math.max(0,need-(b-rem)), nFull:nFull, nPartial:nPartial, nNone:nNone, vShort:vShort};
+  ds.budget = {total:b, used:b-rem, falta:Math.max(0,need-(b-rem)), nFull:nFull, nPartial:nPartial, nNone:nNone, vShort:vShort, firstOn:firstOn};
 }
 
 /* ---------- Vista ---------- */
-function methodLabel(){ return {top:'Meses de mayor entrega',mean:'Promedio',wmean:'Promedio ponderado',median:'Mediana'}[state.params.method]; }
+function methodLabel(){ return {season:'Mismo período del año anterior',top:'Meses de mayor entrega',mean:'Promedio',wmean:'Promedio ponderado',median:'Mediana'}[state.params.method]; }
 function sparkSVG(vals){
   var w=96,h=26,pad=3,max=Math.max.apply(null,vals.concat([1]));
   var n=vals.length, step = n>1 ? (w-2*pad)/(n-1) : 0;
@@ -1247,7 +1339,7 @@ function detailHTML(it){
   var ds=state.ds, r=it.r, labels=ds.labels, months=it.months;
   var max=Math.max.apply(null,months.concat([1]));
   var na = labels.length-ds.nUse;
-  var selSet = (state.params.method==='top' && ds.topSel) ? ds.topSel : null;
+  var selSet = ((state.params.method==='top'||state.params.method==='season') && ds.topSel) ? ds.topSel : null;
   var bars = months.map(function(v,i){
     return i<na ? '<div class="bar na" title="'+esc(labels[i])+': sin dato"></div>'
                 : '<div class="bar'+(selSet && selSet.indexOf(i-na)<0?' dim':'')+'" style="height:'+(v/max*100).toFixed(1)+'%" title="'+esc(labels[i])+': '+nf0.format(v)+'"></div>';
@@ -1260,7 +1352,7 @@ function detailHTML(it){
   if(r.trend!=null) tags.push(r.trend>0 ? 'El consumo de los últimos 3 meses subió '+nf0.format(r.trend*100)+'% frente a los meses anteriores.' : 'El consumo de los últimos 3 meses bajó '+nf0.format(-r.trend*100)+'% frente a los meses anteriores.');
   if(r.recentUsed) tags.push('Se usó el consumo de los últimos 3 meses porque supera al de referencia (suben los pacientes en tratamiento crónico).');
   if(it.noStock) tags.push('No figura en el archivo de stock: se tomó 0.');
-  var L=state.params.lead, R=state.params.cycle;
+  var L=state.params.lead, R=getR();
   var rows = [
     ['Consumo mensual usado ('+methodLabel().toLowerCase()+')', fmtCons(r.base)],
     ['Promedio / mediana / desvío', fmtCons(r.mean)+' / '+fmtCons(r.median)+' / '+fmtCons(r.sd)],
@@ -1274,6 +1366,7 @@ function detailHTML(it){
     ['A pedir'+(it.mEff>1?' (múltiplos de '+nf0.format(it.mEff)+')':''), nf0.format(r.pedir)]
   ];
   if(state.ds.budget && r.pedir>0) rows.push(['Ajustado al presupuesto', nf0.format(r.pedirAj)]);
+  if(r.perDay>0 && !ds.stockMissing) rows.push(['Cobertura con el pedido', nf1.format((r.disp+r.pedirAj)/r.perDay)+' días hábiles (objetivo: '+(L+R)+')']);
   if(r.cost!=null) rows.push(['Costo estimado', money(r.costAj!=null?r.costAj:r.cost)]);
   return '<tr class="det"><td colspan="10"><div class="detail"><div>'+
     '<div class="bars">'+bars+(r.base>0?'<div class="meanline" style="top:'+meanTop+'%"></div>':'')+'</div>'+
@@ -1343,6 +1436,8 @@ function renderNotes(){
   var ds=state.ds;
   if(ds && ds.error) out.push('<div class="note err">'+esc(ds.error)+'</div>');
   else if(ds){
+    if(ds.plan && ds.plan.auto) out.push('<div class="note">Compra hasta el '+fmtD(ds.plan.end)+'. Pedido el '+fmtD(ds.plan.od)+', llega el '+fmtD(ds.plan.arrive)+'. Cubre '+(state.params.lead+ds.plan.R)+' días hábiles desde el pedido, sin contar '+ds.plan.nHol+' feriado'+(ds.plan.nHol===1?'':'s')+'.</div>');
+    if(ds.seasonInfo) out.push('<div class="note">'+esc(ds.seasonInfo)+'</div>');
     if(state.sample) out.push('<div class="note">Estás viendo datos de ejemplo: '+ds.items.length+' artículos ficticios. Cargá tu historial de consumo para reemplazarlos.</div>');
     ds.warnings.forEach(function(w){ out.push('<div class="note warn">'+esc(w)+'</div>'); });
     if(curBudget() && !ds.hasCostV) out.push('<div class="note warn">Para aplicar el presupuesto hace falta cargar precios. Usá “Precios (opcional)” en Datos, o una columna de costo en tus archivos.</div>');
@@ -1370,7 +1465,7 @@ function renderSummary(){
     var bd=ds.budget;
     extra.push(bd.falta<=0
       ? 'El presupuesto de '+money(bd.total)+' alcanza para todo el pedido.'
-      : 'Con el presupuesto de '+money(bd.total)+' se piden '+bd.nFull+' artículos completos'+(bd.nPartial?', '+bd.nPartial+' parciales':'')+(bd.nNone?' y '+bd.nNone+' quedan sin pedir':'')+'. Faltan '+money(bd.falta)+' para el pedido completo. Se compra primero lo más urgente, y la urgencia pesa más en los vitales. Se cubre el consumo esperado de cada artículo antes que su stock de seguridad.');
+      : 'Con el presupuesto de '+money(bd.total)+' se piden '+bd.nFull+' artículos completos'+(bd.nPartial?', '+bd.nPartial+' parciales':'')+(bd.nNone?' y '+bd.nNone+' quedan sin pedir':'')+'. Faltan '+money(bd.falta)+' para el pedido completo. Se compra primero lo más urgente, y la urgencia pesa más en los vitales. Se cubre el consumo esperado de cada artículo antes que su stock de seguridad.'+(bd.firstOn?' Como la compra es de varios meses, primero se cubre el primer mes de todos los artículos y después el resto.':''));
   }
   if(nExcl) extra.push(nExcl+' artículo'+(nExcl>1?'s':'')+' excluido'+(nExcl>1?'s':'')+' del pedido: no suman al costo total ni al presupuesto.');
   if(ds.excess>0) extra.push('Hay '+money(ds.excess)+' de stock por encima del objetivo. No repongas esos artículos hasta que bajen.');
@@ -1428,14 +1523,14 @@ function renderMonths(){
   if(!ds || ds.error || !ds.monthIdx){ box.hidden=true; return; }
   box.hidden=false;
   var n=ds.nUse, labels=ds.labels.slice(-n), idx=ds.monthIdx, max=Math.max.apply(null,idx.concat([1]));
-  var sel = (state.params.method==='top' && ds.topSel) ? ds.topSel : null;
+  var sel = ((state.params.method==='top'||state.params.method==='season') && ds.topSel) ? ds.topSel : null;
   var bars = idx.map(function(v,i){ var on = !sel || sel.indexOf(i)>=0;
     return '<div class="mbar'+(on?'':' dim')+'" style="height:'+(v/max*100).toFixed(1)+'%" title="'+esc(labels[i])+': '+nf0.format(v)+'"></div>'; }).join('');
   var lb = labels.map(function(l){ return '<span>'+esc(l)+'</span>'; }).join('');
   var vl = idx.map(function(v){ return '<span>'+nf0.format(v)+'</span>'; }).join('');
   box.innerHTML = '<h2>Entrega por mes</h2><div class="mbars">'+bars+'</div><div class="bl">'+lb+'</div><div class="bv">'+vl+'</div>'+
     '<p class="small" style="margin:8px 0 0">100 es un mes con la entrega promedio de cada artículo. '+
-    (sel ? 'Los meses resaltados son los de mayor entrega y son los que se usan para estimar el consumo.' : 'Elegí “Meses de mayor entrega” en los parámetros para calcular con los meses más fuertes.')+'</p>';
+    (sel ? (state.params.method==='season' ? 'Los meses resaltados son los del año anterior que corresponden al período que cubre el pedido.' : 'Los meses resaltados son los de mayor entrega y son los que se usan para estimar el consumo.') : 'Elegí “Meses de mayor entrega” en los parámetros para calcular con los meses más fuertes.')+'</p>';
 }
 function renderView(){ renderTabs(); renderNotes(); renderMonths(); renderSummary(); renderTable(); }
 
@@ -1598,11 +1693,31 @@ $('btnHelp').addEventListener('click', function(){
 });
 document.querySelectorAll('.toc a').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); var t=document.getElementById(a.getAttribute('href').slice(1)); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }); });
 
-function saveParams(){ try{ localStorage.setItem('pedido-reposicion-params-v5', JSON.stringify({lead:state.params.lead,cycle:state.params.cycle,sl:state.params.sl,method:state.params.method,topK:state.params.topK})); }catch(e){} }
-$('pLead').addEventListener('input', function(e){ var v=parseFloat(e.target.value); if(isFinite(v)&&v>=0){ state.params.lead=v; saveParams(); recalc(); } });
+function saveParams(){ try{ localStorage.setItem('pedido-reposicion-params-v5', JSON.stringify({horizon:state.params.horizon,holidays:state.params.holidays,firstMonth:state.params.firstMonth,lead:state.params.lead,cycle:state.params.cycle,sl:state.params.sl,method:state.params.method,topK:state.params.topK})); }catch(e){} }
+$('pLead').addEventListener('input', function(e){ var v=parseFloat(e.target.value); if(isFinite(v)&&v>=0){ state.params.lead=v; saveParams(); syncPlan(); recalc(); } });
 $('pCycle').addEventListener('input', function(e){ var v=parseFloat(e.target.value); if(isFinite(v)&&v>=1){ state.params.cycle=v; saveParams(); recalc(); } });
 $('pSl').addEventListener('change', function(e){ state.params.sl=e.target.value; saveParams(); recalc(); });
-function syncTop(){ $('topField').hidden = state.params.method!=='top'; }
+function syncTop(){ $('topField').hidden = state.params.method!=='top'; syncPlan(); }
+function syncPlan(){
+  var p=state.params, W=planWindow(), L=p.lead;
+  $('ordField').hidden = $('holField').hidden = !(W.auto || p.method==='season');
+  $('pCycle').disabled = W.auto; $('pCycle').value = W.auto ? W.R : p.cycle;
+  $('planHint').textContent = W.auto
+    ? 'Pedido el '+fmtD(W.od)+', llega el '+fmtD(W.arrive)+'. Cubre hasta el '+fmtD(W.end)+': '+W.R+' días hábiles después de la entrega ('+(L+W.R)+' desde el pedido), sin contar '+W.nHol+' feriado'+(W.nHol===1?'':'s')+'.'
+    : 'Manual: se usa la frecuencia de pedido indicada abajo. Elegí un mes para comprar de una vez hasta esa fecha.';
+}
+function buildHor(){
+  var t=new Date(), sel=$('pHor'), html='<option value="manual">Manual (usar la frecuencia de pedido)</option>', ok=state.params.horizon==='manual';
+  for(var i=0;i<9;i++){ var d=new Date(t.getFullYear(),t.getMonth()+i,1), v=d.getFullYear()+'-'+pad2(d.getMonth()+1);
+    if(v===state.params.horizon) ok=true;
+    html+='<option value="'+v+'">Hasta fin de '+MESNOM[d.getMonth()]+' '+d.getFullYear()+'</option>'; }
+  sel.innerHTML=html; if(!ok) state.params.horizon='manual'; sel.value=state.params.horizon;
+  $('pHol').value=state.params.holidays; $('pFirst').checked=state.params.firstMonth!==false;
+}
+$('pHor').addEventListener('change', function(e){ state.params.horizon=e.target.value; saveParams(); syncPlan(); recalc(); });
+$('pOrdDate').addEventListener('change', function(e){ state.params.orderDate=e.target.value||''; syncPlan(); recalc(); });
+$('pHol').addEventListener('input', function(e){ state.params.holidays=e.target.value; saveParams(); syncPlan(); recalc(); });
+$('pFirst').addEventListener('change', function(e){ state.params.firstMonth=e.target.checked; saveParams(); recalc(); });
 $('pMethod').addEventListener('change', function(e){ state.params.method=e.target.value; syncTop(); saveParams(); recalc(); });
 $('pTopK').addEventListener('input', function(e){ var v=parseInt(e.target.value,10); if(isFinite(v)&&v>=1){ state.params.topK=v; saveParams(); recalc(); } });
 $('pDepot').addEventListener('change', function(e){ state.params.depot=e.target.value; refresh(true); });
@@ -1623,7 +1738,7 @@ $('pChronic').addEventListener('change', function(e){ state.params.chronicVital=
 $('pRound').addEventListener('input', function(e){ var v=parseInt(e.target.value,10); if(isFinite(v)&&v>=1){ state.params.roundTo=v; recalc(); } });
 $('pMult').addEventListener('change', function(e){ state.params.useMult=e.target.checked; recalc(); });
 $('pDrop').addEventListener('change', function(e){ state.params.dropLast=e.target.checked; refresh(true); });
-$('pLead').value=state.params.lead; $('pCycle').value=state.params.cycle; $('pSl').value=state.params.sl; $('pMethod').value=state.params.method; $('pTopK').value=state.params.topK; syncTop();
+$('pLead').value=state.params.lead; $('pCycle').value=state.params.cycle; $('pSl').value=state.params.sl; $('pMethod').value=state.params.method; $('pTopK').value=state.params.topK; buildHor(); syncTop();
 
 $('q').addEventListener('input', function(e){ state.ui.q=e.target.value; if(state.ds&&!state.ds.error) renderTable(); });
 $('fClase').addEventListener('change', function(e){ state.ui.cls=e.target.value; if(state.ds&&!state.ds.error) renderTable(); });
